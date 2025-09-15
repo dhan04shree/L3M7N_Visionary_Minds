@@ -11,7 +11,7 @@ import { createPlaylistRequest } from "../controller/playlistController.js";
 // router.post('/:id/entry', transcribeEntry);
 // router.post('/:id/analysis', analyzeAudio);
 
-router.post("/",createPlaylistRequest);
+router.post("/",authMiddleware,createPlaylistRequest);
 // router.post('/',authMiddleware,playlistController);
 
 // router.get('/showentry',authMiddleware,showController)
