@@ -1,6 +1,6 @@
 export default function Footer({
-  brand = "AlgoVoice",
-  description = "Empowering minds to capture, connect, and cultivate breakthrough thinking.",
+  brand = "MoodBeats",
+  description = "Your mood, your music. Instantly generate a 10-song playlist based on how you feel, your favorite artist, or what you’re doing right now.",
   columns = [
     {
       title: "Product",
