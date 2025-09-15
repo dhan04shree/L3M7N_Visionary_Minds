@@ -9,25 +9,33 @@ export default function MoodBeatsForm() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setSongs([]);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setSongs([]);
 
-    try {
-      // Send inputs to backend
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/playlists`, { mood, artist, activity });
-      
-      // res.data.data contains saved document including songs
-      setSongs(res.data.data.songs || []);
-      alert("🎶 Playlist Generated and Saved!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to generate playlist");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const token = localStorage.getItem("token"); // ✅ get token
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/playlists`,
+      { mood, artist, activity },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ attach token
+        },
+      }
+    );
+
+    setSongs(res.data.data.songs || []);
+    alert("Playlist Generated and Saved!");
+  } catch (err) {
+    console.error("Playlist request failed:", err);
+    alert("Failed to generate playlist");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6">
