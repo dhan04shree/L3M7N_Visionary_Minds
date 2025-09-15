@@ -26,7 +26,7 @@ export default function HeroSection(){
         <button className="herobtn group text-black/90  px-6 py-3 rounded-lg transition duration-300 flex items-center gap-2" onClick={handleGetStarted}>Get Started <span className="inline-block transform transition-transform duration-300 group-hover:translate-x-1"><i className="fa-solid fa-arrow-right-long"></i></span></button>
         </form>     
         <form className="flex justify-center mt-4 ms-3">
-        <button className="group bg-[#0C0C0C] hover:bg-gray-700  text-white/99 border-0.5 border-gray-700/70  px-6 py-3 rounded-lg transition duration-300 flex items-center gap-2" onClick={handleShowentry}>My Records</button>
+        {/* <button className="group bg-[#0C0C0C] hover:bg-gray-700  text-white/99 border-0.5 border-gray-700/70  px-6 py-3 rounded-lg transition duration-300 flex items-center gap-2" onClick={handleShowentry}>My Records</button> */}
         </form>                           
         </div>
         </div>
