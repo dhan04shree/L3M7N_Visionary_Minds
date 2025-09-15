@@ -1,86 +1,130 @@
-import  { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import VoiceRecorder from "../components/voiceRecorder"; 
+import { useState } from "react";
+import axios from "axios";
+import { Music, Smile, User, Activity } from "lucide-react";
 
-const VoiceEntryForm = () => {
-    const navigate = useNavigate(); 
-  const [question, setTitle] = useState('');
-  // const [solutionText, setDescription] = useState('');
-  const [tags, setTags] = useState('');
-  const [voiceUrl, setVoiceUrl] = useState('');
-  const [queUrl, setQueUrl] = useState('');
-const [isUploading, setIsUploading] = useState(false);
-
+export default function MoodBeatsForm() {
+  const [mood, setMood] = useState("");
+  const [artist, setArtist] = useState("");
+  const [activity, setActivity] = useState("");
+  const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!voiceUrl) {
-        return;
-      }
-    const payload = {
-      question,
-      // solutionText,
-      tags: tags.split(',').map(tag => tag.trim()),
-      voiceUrl,
-      queUrl
-    };
-    console.log(payload);
+    setLoading(true);
+    setSongs([]);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/algovoice`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json',
-          "Authorization": `Bearer ${token}`
-         },
-        body: JSON.stringify(payload),
-      });
-        if (res.ok) {
-        alert('Entry saved successfully!');
-        navigate('/showentry'); 
-      } else {
-        alert('Error saving entry.');
-      }
+      // Send inputs to backend
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/playlists`, { mood, artist, activity });
       
+      // res.data.data contains saved document including songs
+      setSongs(res.data.data.songs || []);
+      alert("🎶 Playlist Generated and Saved!");
     } catch (err) {
       console.error(err);
-      alert('Error saving entry.');
+      alert("Failed to generate playlist");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className=" mt-5 max-w-xl mx-auto p-6 text-white rounded shadow space-y-4">
-      <h1 className="text-2xl md:text-3xl font-bold text-white-800 mb-6">Type your mood, favorite artist, or activity</h1>
-      <form onSubmit={handleSubmit} >
-        <label htmlFor="QuestionText" className='text-lg'>Title</label>
-        <textarea id='QuestionText' type="text" placeholder="Question Title" value={question} onChange={(e) => setTitle(e.target.value)} className="bg-gray-800 text-white mb-4 mt-2 w-full border border-white  p-2 rounded" required/>
-          <label htmlFor="QuestionUrl" className='text-lg'>Question URL Link</label>
-        <input  id='QuestionUrl' type="url" placeholder="Paste the link" value={queUrl} onChange={(e) => setQueUrl(e.target.value)} className="bg-gray-800 mb-4 mt-2 w-full border border-white p-2 rounded  text-white" />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-md w-full mb-6">
+        <div className="flex flex-col items-center mb-6">
+          <Music className="w-10 h-10 text-purple-600 mb-2" />
+          <h1 className="text-2xl font-bold text-gray-800">MoodBeats</h1>
+          <p className="text-gray-500 text-center mt-1">
+            Choose your vibe, artist, or activity — or mix them together.
+          </p>
+        </div>
 
-        {/* <textarea placeholder="Solution Description" value={solutionText} onChange={(e) => setDescription(e.target.value)} className="w-full border p-2 rounded bg-gray-800 text-white" rows={4}  /> */}
-        <label htmlFor="Tags" className='text-lg'>Tags</label>
-        <input type="text"  id='Tags' placeholder="Tags (comma separated)" value={tags} onChange={(e) => setTags(e.target.value)} className="bg-gray-800 mb-4 mt-2 w-full border border-white p-2 rounded  text-white"/>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Mood Dropdown */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <Smile className="text-purple-500 w-5 h-5" />
+            <select
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Mood</option>
+              <option value="happy">😊 Happy</option>
+              <option value="sad">😢 Sad</option>
+              <option value="energetic">⚡ Energetic</option>
+              <option value="chill">🛋️ Chill</option>
+            </select>
+          </div>
 
-       <VoiceRecorder 
-        onUpload={(url) => {
-          setVoiceUrl(url);
-          setIsUploading(false);
-        }} 
-        onStartUpload={() => setIsUploading(true)} 
-      />
-       {isUploading && (
-        <div className="text-sm text-green-400 text-center">
-          ⏳ Uploading voice... please wait.
+          {/* Artist Dropdown */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <User className="text-purple-500 w-5 h-5" />
+            <select
+              value={artist}
+              onChange={(e) => setArtist(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Artist</option>
+              <option value="arijit-singh">🎤 Arijit Singh</option>
+              <option value="taylor-swift">🎸 Taylor Swift</option>
+              <option value="weeknd">🎧 The Weeknd</option>
+              <option value="edsheeran">🎸 Ed Sheeran</option>
+            </select>
+          </div>
+
+          {/* Activity Dropdown */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <Activity className="text-purple-500 w-5 h-5" />
+            <select
+              value={activity}
+              onChange={(e) => setActivity(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Activity</option>
+              <option value="study">📚 Studying</option>
+              <option value="running">🏃 Running</option>
+              <option value="workout">💪 Workout</option>
+              <option value="relaxing">🧘 Relaxing</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-purple-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-purple-700 transition-all"
+          >
+            {loading ? "Generating..." : "🎶 Generate Playlist"}
+          </button>
+        </form>
+      </div>
+
+      {/* Display Suggested Songs */}
+      {songs.length > 0 && (
+        <div className="bg-white shadow-2xl rounded-2xl p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Your Playlist</h2>
+          <div className="flex flex-col gap-3">
+            {songs.map((song, idx) => (
+              <div
+                key={idx}
+                className="flex justify-between items-center p-3 bg-gray-100 rounded-xl"
+              >
+                <div>
+                  <p className="font-semibold">{song.name}</p>
+                  <p className="text-gray-500 text-sm">{song.artist}</p>
+                </div>
+                <a
+                  href={song.url}
+                  target="_blank"
+                  className="text-purple-600 font-semibold hover:underline"
+                >
+                  Listen
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-
-        <button
-          type="submit"
-          className="mt-4 w-full bg-[#a243ce] hover:bg-[#742e95] py-2 rounded">Generate Playlist
-        </button>
-      </form>
     </div>
   );
-};
-
-export default VoiceEntryForm;
+}

@@ -1,57 +1,133 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-const ShowEntry = () => {
-  const [entries, setEntries] = useState([]);
-  const navigate = useNavigate();
-  useEffect(() => {
-    const fetchEntries = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/algovoice/showentry`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+import { useState } from "react";
+import axios from "axios";
+import { Music, Smile, User, Activity } from "lucide-react";
 
-        if (!res.ok) {
-          console.error("Error fetching entries:", res.status);
-          return;
-        }
+export default function MoodBeats() {
+  const [mood, setMood] = useState("");
+  const [artist, setArtist] = useState("");
+  const [activity, setActivity] = useState("");
+  const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-        const data = await res.json();
-        setEntries(data);
-      } catch (err) {
-        console.error("Error:", err);
-      }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSongs([]);
 
-    fetchEntries();
-  }, []);
+    try {
+      const res = await axios.post("/api/playlists", { mood, artist, activity });
+      setSongs(res.data.data.songs || []);
+    } catch (err) {
+      console.error(err);
+      alert("Error generating playlist");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="text-white py-6 max-w-7xl">
-    <h1 className='text-3xl pb-6 text-center'>My Records</h1>
-      <div className='flex flex-wrap justify-center'>
-        {entries.map((entry) => (
-          <div className='p-6 cursor-pointer border b-gray-1 rounded-lg m-2' 
-          onClick={() => navigate(`/entry/${entry._id}`)}  key={entry._id} >
-            <a  className='font-bold text-gray-300'>{entry.question}</a>
-            <p className="text-sm text-gray-500">Click to view details</p>
-            {/* <audio id='player' controls className="my-4 text-blue-500 rounded-lg"> */}
-            {/* <source src={entry.voiceUrl} type="audio/webm"></source> */}
-            {/* </audio> */}
-            {/* <button className='mb-2 w-full bg-blue-500/50 hover:bg-blue-500/80 text-white py-2 rounded-lg  transition-colors duration-200'><a href={entry.queUrl}>Question Link</a></button> */}
-            {/* <div className='flex'> */}
-              {/* {entry.tags.map((tag)=>( */}
-              {/* <div className='text-blue-500'># */}
-                {/* <a className=' hover:underline' href=''>{tag}</a>&nbsp;&nbsp; */}
-              {/* </div> */}
-            {/* ))} */}
-            {/* </div> */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center p-6">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-md w-full mb-6">
+        <div className="flex flex-col items-center mb-6">
+          <Music className="w-10 h-10 text-purple-600 mb-2" />
+          <h1 className="text-2xl font-bold text-gray-800">MoodBeats</h1>
+          <p className="text-gray-500 text-center mt-1">
+            Pick your vibe, artist, or activity and get a personalized playlist.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Mood */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <Smile className="text-purple-500 w-5 h-5" />
+            <select
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Mood</option>
+              <option value="happy">😊 Happy</option>
+              <option value="sad">😢 Sad</option>
+              <option value="energetic">⚡ Energetic</option>
+              <option value="chill">🛋️ Chill</option>
+            </select>
           </div>
-        ))}
+
+          {/* Artist */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <User className="text-purple-500 w-5 h-5" />
+            <select
+              value={artist}
+              onChange={(e) => setArtist(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Artist</option>
+              <option value="arijit-singh">🎤 Arijit Singh</option>
+              <option value="taylor-swift">🎸 Taylor Swift</option>
+              <option value="weeknd">🎧 The Weeknd</option>
+              <option value="edsheeran">🎸 Ed Sheeran</option>
+            </select>
+          </div>
+
+          {/* Activity */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-3">
+            <Activity className="text-purple-500 w-5 h-5" />
+            <select
+              value={activity}
+              onChange={(e) => setActivity(e.target.value)}
+              className="bg-transparent w-full outline-none"
+            >
+              <option value="">Select Activity</option>
+              <option value="study">📚 Studying</option>
+              <option value="running">🏃 Running</option>
+              <option value="workout">💪 Workout</option>
+              <option value="relaxing">🧘 Relaxing</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-purple-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-purple-700 transition-all"
+            disabled={loading}
+          >
+            {loading ? "Generating..." : "🎶 Generate Playlist"}
+          </button>
+        </form>
       </div>
+
+      {/* Display Songs */}
+      {songs.length > 0 ? (
+        <div className="bg-white shadow-2xl rounded-2xl p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Your Playlist</h2>
+          <div className="flex flex-col gap-3">
+            {songs.map((song, idx) => (
+              <div
+                key={idx}
+                className="flex justify-between items-center p-3 bg-gray-100 rounded-xl"
+              >
+                <div>
+                  <p className="font-semibold">{song.name}</p>
+                  <p className="text-gray-500 text-sm">{song.artist}</p>
+                </div>
+                <a
+                  href={song.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 font-semibold hover:underline"
+                >
+                  Listen
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        loading === false && (
+          <p className="text-white mt-4 text-center">
+            No playlist yet. Choose your mood, artist, or activity to generate one.
+          </p>
+        )
+      )}
     </div>
   );
-};
-export default ShowEntry;
+}

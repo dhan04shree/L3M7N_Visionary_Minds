@@ -3,10 +3,11 @@ const app = express();
 import mongoose from "mongoose";
 import cors from "cors";
 import authRoute from "./routes/auth.js";
-import algovoiceRoutes from "./routes/algovoice.js";
-import multer from "multer";
-import { storage } from "./cloudinary.js";
-const upload = multer({ storage });
+// import algovoiceRoutes from "./routes/algovoice.js";
+import playlistRoutes from "./routes/playlistRoutes.js";
+// import multer from "multer";
+// import { storage } from "./cloudinary.js";
+// const upload = multer({ storage });
 import dotenv from "dotenv";
 dotenv.config();
 const DB_URL = process.env.MONGO_URL;
@@ -30,14 +31,14 @@ app.use(express.json());
 // });
 
 
-app.post('/upload-audio', upload.single('audio'), (req, res) => {
-   try {
-    return res.json({ url: req.file.path }); // return uploaded URL
-  } catch (error) {
-    console.error('Upload error', error);
-    return res.status(500).json({ error: 'Upload failed' });
-  }
-}); 
+// app.post('/upload-audio', upload.single('audio'), (req, res) => {
+//    try {
+//     return res.json({ url: req.file.path }); // return uploaded URL
+//   } catch (error) {
+//     console.error('Upload error', error);
+//     return res.status(500).json({ error: 'Upload failed' });
+//   }
+// }); 
 
 app.get("/api/playlist", async (req, res) => {
   const { query } = req.query;
@@ -56,7 +57,8 @@ app.get("/api/playlist", async (req, res) => {
 
 
 
-app.use('/api/algovoice',algovoiceRoutes);
+// app.use('/api/playlists',algovoiceRoutes);
+app.use("/api/playlists", playlistRoutes);
 app.use("/api/auth",authRoute);
 app.listen(process.env.PORT, () => {
   console.log(`app listetning to port ${process.env.PORT}`);
