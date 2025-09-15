@@ -10,30 +10,34 @@ const Registration = () => {
 
  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
-        username,
-        password,
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
+      username,
+      password,
+    });
 
-       console.log("Registration response:", res);
+    console.log("Registration response:", res);
 
     const token = res.data.token;
-
     if (!token) {
       throw new Error("Token not received from server");
     }
+
     localStorage.setItem("token", token);
     navigate("/newentry");
-   
-      setMessage(res.data.message);
-    } catch (error) {
-      console.error("Registration failed:", error.res.data.error);
-      setMessage(error.res.data.error);
+    setMessage(res.data.message);
+  } catch (error) {
+    console.error("Registration failed:", error);
+    if (error.response && error.response.data) {
+      setMessage(error.response.data.error || "Registration failed");
+    } else {
+      setMessage("Something went wrong. Please try again.");
     }
-  };
+  }
+};
+
 
   return (
     <div className=" flex md:items-center justify-center min-h-screen">
